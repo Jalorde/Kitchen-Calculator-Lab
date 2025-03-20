@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none; /* Class to hide elements */
+        }
+        .image-container img {
+            width: auto;
+            max-height: auto;
+            object-fit: cover; /* Ensures the image fits nicely in its container */
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="card p-4 shadow-lg" id="calculatorContainer">
+            <h2 class="text-center mb-4">Kitchen Calculator</h2>
+            <form id="kitchenForm">
+                <div class="mb-3">
+                    <label for="productType" class="form-label">1. Select your product type:</label>
+                    <select class="form-select" id="productType" name="productType" onchange="toggleCornerUnits()" required>
+                        <option value="">Select Your Product</option>
+                        <option value="Base Cabinets">Base Cabinets</option>
+                        <option value="Wall Cabinets">Wall Cabinets</option>
+                        <option value="Counter Tops">Counter Tops</option>
+                    </select>
+                </div>
+
+                <div class="image-container mt-4">
+                    <img id="productImage" src="" alt="Product Image" class="hidden"> <!-- Image placeholder -->
+                </div>
+                
+                <div class="mb-3">
+                    <p>2. Select the product line:</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="empire" name="productLine" value="Empire Standard" checked>
+                        <label class="form-check-label" for="empire">Empire Standard</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="elite" name="productLine" value="Kitchen Elite">
+                        <label class="form-check-label" for="elite">Kitchen Elite</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="goldStar" name="productLine" value="Gold Star Plus">
+                        <label class="form-check-label" for="goldStar">Gold Star Plus</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="linearFootage" class="form-label">3. Enter linear footage (ft):</label>
+                    <input type="number" id="linearFootage" name="linearFootage" min="0" required>
+                </div>
+                
+                <div class="mb-3 hidden" id="cornerUnitsDiv">
+                    <label for="cornerUnits" class="form-label">4. If cabinets, how many corner units?</label>
+                    <input type="number" id="cornerUnits" name="cornerUnits" min="0" value="0">
+                </div>
+
+                <button type="button" class="btn btn-danger" onclick="calculatePrice()">Calculate</button>
+            </form>
+
+            <div class="mt-4">
+                <h4>5. Total Price:</h4>
+                <p id="result" class="fs-4">Total Price: $0.00</p> <!-- Displays total price -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // Price data for different product lines and types
+        var prices = {
+            "Empire Standard": { "Wall Cabinets": 99.99, "Base Cabinets": 69.99, "Counter Tops": 30.99, "Corner Units": 50.99 },
+            "Kitchen Elite": { "Wall Cabinets": 179.00, "Base Cabinets": 79.00, "Counter Tops": 189.99, "Corner Units": 79.99 },
+            "Gold Star Plus": { "Wall Cabinets": 200.99, "Base Cabinets": 99.99, "Counter Tops": 212.99, "Corner Units": 89.99 }
+        };
+    
+        // Image paths for product types
+        var productImages = {
+            "Wall Cabinets": "kitchens/wall.jpg",
+            "Base Cabinets": "kitchens/base.jpg",
+            "Counter Tops": "kitchens/counters.jpg"
+        };
+    
+        // Function to toggle the display of corner units input based on selected product type
+        function toggleCornerUnits() {
+            var productType = document.getElementById("productType").value;
+            var cornerUnitsDiv = document.getElementById("cornerUnitsDiv");
+            var productImage = document.getElementById("productImage");
+
+            // Show or hide the corner units input
+            cornerUnitsDiv.classList.toggle("hidden", ["Wall Cabinets", "Base Cabinets"].indexOf(productType) === -1);
+            // Set the image source based on selected product type
+            productImage.src = productImages[productType] || "";
+            productImage.classList.toggle("hidden", productImages[productType] === undefined);
+        }
+    
+        // Function to calculate the total price based on user inputs
+        function calculatePrice() {
+            var productType = document.getElementById("productType").value;
+            var productLine = document.querySelector('input[name="productLine"]:checked').value;
+            var linearFootage = parseFloat(document.getElementById("linearFootage").value);
+            var cornerUnits = parseInt(document.getElementById("cornerUnits").value) || 0;
+
+            // Validate inputs
+            var isProductTypeSelected = productType !== "";
+            var isLinearFootageValid = linearFootage >= 0;
+
+            if (isProductTypeSelected === false || isLinearFootageValid === false) {
+                alert("REQUIRED: Please select BOTH a product type and enter the linear footage.");
+                return; // Exit the function if inputs are invalid
+            }
+    
+            // Calculate the total price
+            var totalPrice = prices[productLine][productType] * linearFootage;
+            if (["Wall Cabinets", "Base Cabinets"].indexOf(productType) !== -1) {
+                totalPrice += prices[productLine]["Corner Units"] * cornerUnits;
+            }
+    
+            // Update the displayed total price
+            document.getElementById("result").textContent = `Total Price: $${totalPrice.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
